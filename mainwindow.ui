@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1239</width>
+    <height>1046</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SerialPortAssistant</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1" rowspan="3">
+     <widget class="QSplitter" name="splitter">
+      <property name="styleSheet">
+       <string notr="true">color: rgb(85, 170, 255);</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QTextEdit" name="textEdit_dataReceive">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>704</width>
+         <height>350</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 10pt &quot;Monospace&quot;;
+font: 10pt &quot;Noto Mono&quot;;
+background-color: rgb(34, 34, 34);
+color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
+       <property name="cursorWidth">
+        <number>1</number>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
+        <item>
+         <widget class="QTextEdit" name="textEdit_dataSend">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>10</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>160</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(16, 16, 16);</string>
+          </property>
+          <property name="lineWrapMode">
+           <enum>QTextEdit::WidgetWidth</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_dataSend">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>160</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(85, 170, 255);</string>
+          </property>
+          <property name="text">
+           <string>发送</string>
+          </property>
+          <property name="shortcut">
+           <string>Return</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>235</width>
+        <height>400</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>235</width>
+        <height>400</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">alternate-background-color: rgb(85, 170, 255);</string>
+      </property>
+      <property name="title">
+       <string>串口设置</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>100</y>
+         <width>44</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>串口</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_port">
+       <property name="geometry">
+        <rect>
+         <x>64</x>
+         <y>99</y>
+         <width>161</width>
+         <height>39</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>148</y>
+         <width>66</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>波特率</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_baudRate">
+       <property name="geometry">
+        <rect>
+         <x>84</x>
+         <y>148</y>
+         <width>141</width>
+         <height>39</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>197</y>
+         <width>66</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>数据位</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_dateBit">
+       <property name="geometry">
+        <rect>
+         <x>84</x>
+         <y>197</y>
+         <width>141</width>
+         <height>39</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>246</y>
+         <width>66</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>校验位</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_parityBit">
+       <property name="geometry">
+        <rect>
+         <x>84</x>
+         <y>246</y>
+         <width>141</width>
+         <height>39</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>295</y>
+         <width>66</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>停止位</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_stopBit">
+       <property name="geometry">
+        <rect>
+         <x>84</x>
+         <y>295</y>
+         <width>141</width>
+         <height>38</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_openPort">
+       <property name="geometry">
+        <rect>
+         <x>18</x>
+         <y>52</y>
+         <width>126</width>
+         <height>37</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>单击打开串口</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>打开串口</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="comboBox_flowControl">
+       <property name="geometry">
+        <rect>
+         <x>84</x>
+         <y>343</y>
+         <width>141</width>
+         <height>39</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>343</y>
+         <width>66</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>流控</string>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="2">
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>331</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>235</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>其它设置</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QCheckBox" name="checkBox_echo">
+           <property name="text">
+            <string>回显</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBox_timestamp">
+           <property name="text">
+            <string>时间戳</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>结束符</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_endChar">
+           <property name="minimumSize">
+            <size>
+             <width>123</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton_clearDateReceive">
+         <property name="styleSheet">
+          <string notr="true">selection-color: rgb(166, 255, 191);</string>
+         </property>
+         <property name="text">
+          <string>清空接收</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButton_clearDateReceive_2">
+         <property name="minimumSize">
+          <size>
+           <width>101</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">selection-color: rgb(166, 255, 191);</string>
+         </property>
+         <property name="text">
+          <string>清空发送</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QListWidget" name="listWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>210</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>221</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="movement">
+          <enum>QListView::Free</enum>
+         </property>
+         <property name="resizeMode">
+          <enum>QListView::Adjust</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1239</width>
+     <height>38</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
