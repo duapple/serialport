@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/dev_flush.png</file>
+    </qresource>
+</RCC>
