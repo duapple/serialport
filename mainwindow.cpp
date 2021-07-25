@@ -115,6 +115,12 @@ void MainWindow::restoreUiSettings()
         qDebug() << "splitter size load success";
     }
 
+    if (settings.contains("splitterSizes2"))
+    {
+        ui->splitter_2->restoreState(settings.value("splitterSizes2").toByteArray());
+        qDebug() << "splitter2 size load success";
+    }
+
     if (settings.contains("mainwindow"))
     {
         restoreState(settings.value("mainwindow").toByteArray());
@@ -464,6 +470,7 @@ void MainWindow::on_pushButton_clearDateReceive_2_clicked()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     settings.setValue("splitterSizes", ui->splitter->saveState());
+    settings.setValue("splitterSizes2", ui->splitter_2->saveState());
     settings.setValue("mainwindow", saveState());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("port", ui->comboBox_port->currentText());
