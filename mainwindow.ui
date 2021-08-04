@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1064</width>
-    <height>760</height>
+    <width>1098</width>
+    <height>854</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,7 +54,7 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>331</height>
+            <height>200</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -70,6 +70,13 @@
            <item row="0" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
+              <widget class="QRadioButton" name="radioButton_display_receive">
+               <property name="text">
+                <string>接收</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QCheckBox" name="checkBox_echo">
                <property name="text">
                 <string>回显</string>
@@ -84,6 +91,49 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QListWidget" name="listWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>351</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="focusPolicy">
+              <enum>Qt::StrongFocus</enum>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;双击发送&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::ExtendedSelection</enum>
+             </property>
+             <property name="movement">
+              <enum>QListView::Free</enum>
+             </property>
+             <property name="resizeMode">
+              <enum>QListView::Adjust</enum>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -177,49 +227,6 @@
               </widget>
              </item>
             </layout>
-           </item>
-           <item row="3" column="0">
-            <widget class="QListWidget" name="listWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>160</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>351</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::StrongFocus</enum>
-             </property>
-             <property name="contextMenuPolicy">
-              <enum>Qt::CustomContextMenu</enum>
-             </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;双击发送&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="selectionMode">
-              <enum>QAbstractItemView::ExtendedSelection</enum>
-             </property>
-             <property name="movement">
-              <enum>QListView::Free</enum>
-             </property>
-             <property name="resizeMode">
-              <enum>QListView::Adjust</enum>
-             </property>
-            </widget>
            </item>
           </layout>
          </widget>
@@ -440,8 +447,14 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>704</width>
-             <height>602</height>
+             <width>400</width>
+             <height>400</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>500</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -553,7 +566,7 @@ background-color: rgb(85, 170, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1064</width>
+     <width>1098</width>
      <height>25</height>
     </rect>
    </property>
@@ -569,7 +582,10 @@ background-color: rgb(85, 170, 255);</string>
     </property>
     <addaction name="action"/>
     <addaction name="action_2"/>
+    <addaction name="action_7"/>
     <addaction name="action_3"/>
+    <addaction name="action_6"/>
+    <addaction name="separator"/>
     <addaction name="action_4"/>
    </widget>
    <addaction name="menuFile"/>
@@ -660,20 +676,12 @@ background-color: rgb(85, 170, 255);</string>
     <string>Alt+R</string>
    </property>
   </action>
-  <action name="action_3">
-   <property name="text">
-    <string>关闭接收</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N, Ctrl+I</string>
-   </property>
-  </action>
   <action name="action_4">
    <property name="text">
-    <string>暂停显示</string>
+    <string>设置</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+P</string>
+   <property name="toolTip">
+    <string>设置</string>
    </property>
   </action>
   <action name="action_5">
@@ -682,6 +690,30 @@ background-color: rgb(85, 170, 255);</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>显示串口设置窗口</string>
+   </property>
+   <property name="toolTip">
+    <string>显示串口设置窗口</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>接收日志保存到文件</string>
+   </property>
+  </action>
+  <action name="action_7">
+   <property name="text">
+    <string>启动新窗口</string>
    </property>
   </action>
  </widget>

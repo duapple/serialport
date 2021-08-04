@@ -6,11 +6,15 @@
 #include <QTextEdit>
 #include <QDateTime>
 #include <QSettings>
+#include <QMutex>
+#include <QFileInfo>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , settings("SeriapPortAssistant", "SplitterWidget")
+    , mythread(new Mythread)
 {
     ui->setupUi(this);
 
@@ -25,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_dataSend->setEnabled(false);
     ui->textEdit_dataSend->installEventFilter(this);
     ui->listWidget_data_send_list->setGridSize(QSize()); //设置默认大小
+    ui->radioButton_display_receive->setChecked(true);
+    ui->action_3->setChecked(true);
+
+    /* Disable widget_2 minimal, which will be not visable*/
+    int index = ui->splitter_2->indexOf(ui->widget_2);
+    ui->splitter_2->setCollapsible(index, false);
 
     initSerialPortSetting();
     connections();
@@ -162,6 +172,13 @@ void MainWindow::restoreUiSettings()
         ui->dockWidget->isHidden() ? ui->action->setText("显示预定义输入窗口") : ui->action->setText("关闭预定义输入窗口");
     }
 
+    if (settings.contains("global_settings"))
+    {
+        QString str = settings.value("global_settings").toString();
+        globalSettings.StringToGlobalSettings(&str);
+        ui->action_6->setChecked(globalSettings.global_settings.logToFile);
+    }
+
     if (settings.contains("send_data_records"))
     {
         QStringList send_data_records = settings.value("send_data_records").toStringList();
@@ -199,6 +216,12 @@ void MainWindow::on_radioButton_openPort_toggled(bool checked)
         port->setFlowControl(flowControl[ui->comboBox_flowControl->currentIndex()]);
         if (port->open(QSerialPort::ReadWrite))
         {
+            /* 保存接收日志到文件 */
+            if (globalSettings.global_settings.logToFile)
+            {
+                create_log_file();
+            }
+
             ui->radioButton_openPort->setText(tr("关闭串口"));
             ui->pushButton_dataSend->setStyleSheet("background-color: rgb(85, 170, 255);");
             statusBar()->showMessage("Open port success:  " + port->portName() + " ( " + infoList[ui->comboBox_port->currentIndex()].description() + " )");
@@ -242,7 +265,11 @@ void MainWindow::serialPortDataReceive(void)
     QByteArray data = port->readAll();
     QString text;
 
-    if (is_close_receive) return ;
+    if (is_close_receive)
+    {
+        receiveCache += data;
+        return ;
+    }
 
     if (ui->checkBox_timestamp->isChecked())
     {
@@ -254,6 +281,8 @@ void MainWindow::serialPortDataReceive(void)
     ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
     ui->textEdit_dataReceive->insertPlainText(text);
     ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
+
+    save_receive_data(text);
 }
 
 
@@ -340,6 +369,8 @@ void MainWindow::sendData(void)
         return ;
     }
 
+    save_receive_data(dataSend);
+
     ui->textEdit_dataSend->clear();
 }
 
@@ -360,7 +391,14 @@ void MainWindow::sendData(QString &s)
     /* Add end charactor */
     if (ui->comboBox_endChar->currentText() != "NULL")
     {
-        dataSend += endChar[ui->comboBox_endChar->currentIndex()];
+        char buffer[128] = {0};
+        sprintf(buffer, "0x%02x", s.toStdString().at(0));
+        qDebug() << buffer;
+        if (s.toStdString().at(0) != 0x03)
+        {
+            qDebug() << "send char ctrl+c";
+            dataSend += endChar[ui->comboBox_endChar->currentIndex()];
+        }
     }
 
     // Show the data sent.
@@ -387,6 +425,8 @@ void MainWindow::sendData(QString &s)
         statusBar()->setStyleSheet("color:red");
         return ;
     }
+
+    save_receive_data(dataSend);
 
     ui->textEdit_dataSend->clear();
 }
@@ -439,22 +479,10 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         else if (key->matches(QKeySequence::Copy)) {
             qDebug() << "Enter Ctrl+C.";
             ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
-            char etx[] = {0x03};
+            char etx[2] = {0x03};
             QString etxStr = QString::fromStdString(etx);
             sendData(etxStr);
             return true;
-        }
-    }
-    else if (ui->dockWidget == target)
-    {
-        QKeyEvent *key = static_cast<QKeyEvent *>(event);
-        if (event->type() == QEvent::KeyPress)      // 回车发送
-        {
-            if (key->key() == Qt::Key_Return)
-            {
-                printf("test ok\n");
-                return true;
-            }
         }
     }
 
@@ -479,6 +507,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("timestamp", ui->checkBox_timestamp->isChecked());
     settings.setValue("endChar", ui->comboBox_endChar->currentText());
     settings.setValue("data_send_list_window", ui->dockWidget->isHidden());
+    settings.setValue("global_settings", globalSettings.globalSettingsToString());
 
     QStringList send_data_records;
     for (int i = 0; i < ui->listWidget->count(); i++)
@@ -638,17 +667,12 @@ void MainWindow::on_action_2_triggered()
 
 void MainWindow::on_action_4_triggered()
 {
-    is_display_stop = !is_display_stop;
-    !is_display_stop ? ui->action_4->setText("暂停显示") : ui->action_4->setText("开始显示");
+    settings_window = new Settings(nullptr, &globalSettings);
+
+    connect(settings_window, SIGNAL(enable_log_to_file(bool)), this, SLOT(enable_log_to_file1(bool)));
+
+    settings_window->show();
 }
-
-
-void MainWindow::on_action_3_triggered()
-{
-    is_close_receive = !is_close_receive;
-    is_close_receive ? ui->action_3->setText("打开接收") : ui->action_3->setText("关闭接收");
-}
-
 
 void MainWindow::on_action_5_triggered()
 {
@@ -661,5 +685,106 @@ void MainWindow::save_data_send_list(void)
     {
         ui->listWidget_data_send_list->item(i)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     }
+}
+
+void MainWindow::on_radioButton_display_receive_clicked(bool checked)
+{
+    is_close_receive = !checked;
+    if (!is_close_receive)
+    {
+        ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
+        ui->textEdit_dataReceive->insertPlainText(receiveCache);
+        receiveCache.clear();
+        ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
+    }
+}
+
+void MainWindow::on_action_3_triggered(bool checked)
+{
+    ui->widget_2->setHidden(!checked);
+}
+
+void MainWindow::save_receive_data(QString &s)
+{
+    if (globalSettings.global_settings.logToFile == false) return ;
+    static QMutex mutex;
+    mutex.lock();
+    // 输出信息至文件中（读写、追加形式）
+    if (receiveDataFileName == "")
+    {
+        create_log_file();
+    }
+
+    QFile file(receiveDataFileName);
+    file.open(QIODevice::ReadWrite | QIODevice::Append);
+    QTextStream stream(&file);
+    stream << s;
+    file.flush();
+    file.close();
+    mutex.unlock();
+}
+
+void MainWindow::create_log_file()
+{
+    QFileInfo fileInfo(receiveDataFileName);
+    if ( fileInfo.exists())
+    {
+        remove(receiveDataFileName.toStdString().c_str());
+    }
+
+    QString time = "";
+    if (globalSettings.global_settings.enableTimeshift)
+    {
+        time = "-" + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    }
+#if defined(Q_OS_LINUX)
+    receiveDataFileName = globalSettings.global_settings.logPath + "/" + ui->comboBox_port->currentText() + time + ".log";
+#elif defined(Q_OS_WIN)
+    receiveDataFileName = globalSettings.global_settings.logPath + "\\" + ui->comboBox_port->currentText() + time + ".log";
+#endif
+    QFile file(receiveDataFileName);
+    file.open(QIODevice::ReadWrite | QIODevice::Append);
+    file.close();
+}
+
+void MainWindow::enable_log_to_file1(bool checked)
+{
+    ui->action_6->setChecked(checked);
+}
+
+void MainWindow::on_action_6_triggered(bool checked)
+{
+    globalSettings.global_settings.logToFile = checked;
+}
+
+Mythread::Mythread(QObject * parent)
+{
+}
+
+void MainWindow::on_action_7_triggered()
+{
+    mythread->start();
+}
+
+void Mythread::run()
+{
+    QObject *parent=NULL;
+    QProcess *myProcess = new QProcess(parent);
+#if defined(Q_OS_LINUX)
+    QString cmd = QCoreApplication::applicationDirPath() + "/serialPortAssistant";
+#elif defined(Q_OS_WIN)
+    QString cmd = "\"" + QCoreApplication::applicationDirPath() + "\serialPortAssistant\"";
+#endif
+    printf("cmd: %s\n", cmd.toStdString().c_str());
+    qDebug() << cmd;
+    myProcess->start(cmd);
+    myProcess->waitForStarted();
+    myProcess->waitForFinished();
+
+    std::string out = QString::fromLocal8Bit(myProcess->readAllStandardOutput()).toStdString();
+    qDebug() << "out: \r\n" << out.c_str();
+    qInfo() << "serialPort Assisstant process destroy!!!";
+
+    delete parent;
 }
 

@@ -6,6 +6,9 @@
 #include <QSerialPortInfo>
 #include <QSettings>
 #include <QListWidget>
+#include "settings.h"
+#include "inc/global_settings.h"
+#include <QThread>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,6 +20,17 @@ typedef struct global_configuration{
     int data_send_count = DATA_SEND_COUNT;
 } GLOBAL_CONF_t;
 
+class Mythread: public QThread
+{
+    Q_OBJECT
+public:
+    std::string rtt_viewer_exec_cmd;
+    Mythread(QObject * parent = 0);
+
+protected:
+    void run();
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -24,8 +38,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Settings *settings_window;
 
     GLOBAL_CONF_t globle_conf;
+    GlobalSettings globalSettings;
 
     QList<QSerialPort::BaudRate> baudRate;
     QList<QSerialPort::DataBits> dataBits;
@@ -73,9 +89,17 @@ private slots:
 
     void on_action_4_triggered();
 
-    void on_action_3_triggered();
-
     void on_action_5_triggered();
+
+    void on_radioButton_display_receive_clicked(bool checked);
+
+    void on_action_3_triggered(bool checked);
+
+    void on_action_6_triggered(bool checked);
+
+    void enable_log_to_file1(bool checked);
+
+    void on_action_7_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -86,6 +110,9 @@ private:
     bool is_sent;
     bool is_display_stop = false;
     bool is_close_receive = false;
+    QString receiveCache;
+    QString receiveDataFileName;
+    Mythread *mythread;
 
     void initSerialPortSetting(void);
     void restoreUiSettings(void);
@@ -95,6 +122,8 @@ private:
     void sendData(QString &s);
     void flush_device(void);
     void save_data_send_list(void);
+    void save_receive_data(QString &s);
+    void create_log_file(void);
 
 protected:
     bool eventFilter(QObject *target, QEvent *event);

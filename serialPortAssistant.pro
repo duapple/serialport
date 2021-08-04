@@ -10,13 +10,18 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    settings.cpp \
+    src/global_settings.cpp
 
 HEADERS += \
-    mainwindow.h
+    inc/global_settings.h \
+    mainwindow.h \
+    settings.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settings.ui
 
 TRANSLATIONS += \
     serialPortAssistant_zh_CN.ts
