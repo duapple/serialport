@@ -60,22 +60,22 @@ void Settings::restore_settings()
         restoreGeometry(settings.value("geometry").toByteArray());
     }
 
-    ui->checkBox_log_to_file->setChecked(globalSettings->global_settings.logToFile);
-    ui->lineEdit_log_path->setText(globalSettings->global_settings.logPath);
-    ui->checkBox_enable_timeshift->setChecked(globalSettings->global_settings.enableTimeshift);
+    ui->checkBox_log_to_file->setChecked(globalSettings->config->global_settings.logToFile);
+    ui->lineEdit_log_path->setText(globalSettings->config->global_settings.logPath);
+    ui->checkBox_enable_timeshift->setChecked(globalSettings->config->global_settings.enableTimeshift);
 }
 
 void Settings::getSettings(void)
 {
-    globalSettings->global_settings.logToFile = ui->checkBox_log_to_file->isChecked();
-    globalSettings->global_settings.enableTimeshift = ui->checkBox_enable_timeshift->isChecked();
-    globalSettings->global_settings.logPath = ui->lineEdit_log_path->displayText();
+    globalSettings->config->global_settings.logToFile = ui->checkBox_log_to_file->isChecked();
+    globalSettings->config->global_settings.enableTimeshift = ui->checkBox_enable_timeshift->isChecked();
+    globalSettings->config->global_settings.logPath = ui->lineEdit_log_path->displayText();
 }
 
 void Settings::on_pushButton_save_settings_clicked()
 {
     getSettings();
-    emit enable_log_to_file(globalSettings->global_settings.logToFile);
+    emit enable_log_to_file(globalSettings->config->global_settings.logToFile);
 }
 
 

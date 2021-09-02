@@ -41,7 +41,7 @@ public:
     Settings *settings_window;
 
     GLOBAL_CONF_t globle_conf;
-    GlobalSettings globalSettings;
+    GlobalSettings *globalSettings;
 
     QList<QSerialPort::BaudRate> baudRate;
     QList<QSerialPort::DataBits> dataBits;
@@ -104,7 +104,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    QSerialPort *port;
+    QList<QSerialPort *> ports;
+    QSerialPort *current_port;
     QList<QSerialPortInfo> infoList;
     QSettings settings;
     bool is_sent;
@@ -124,6 +125,8 @@ private:
     void save_data_send_list(void);
     void save_receive_data(QString &s);
     void create_log_file(void);
+    void clear_list_ports(void);
+    QSerialPort* find_port_from_list(QString const &port_name);
 
 protected:
     bool eventFilter(QObject *target, QEvent *event);

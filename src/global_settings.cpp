@@ -2,13 +2,31 @@
 
 using namespace std;
 
+GlobalSettings::GlobalSettings()
+{
+//    for (int i = 0; i < MAX_USER_CONFIG; i++)
+//    {
+//        globalConfig.user_config[i].valid = false;
+//    }
+
+    foreach (User_Config_t p, config->user_config)
+    {
+
+    }
+}
+
+GlobalSettings::~GlobalSettings()
+{
+    delete GSettings;
+}
+
 QJsonObject* GlobalSettings::globalSettingsToJosn()
 {
     QJsonObject * root = new QJsonObject();
 
-    (*root)["logPath"] = settings->logPath;
-    (*root)["enableTimeshift"] = settings->enableTimeshift;
-    (*root)["logToFile"] = settings->logToFile;
+    (*root)["logPath"] = config->global_settings.logPath;
+    (*root)["enableTimeshift"] = config->global_settings.enableTimeshift;
+    (*root)["logToFile"] = config->global_settings.logToFile;
 
     QJsonDocument jsonDoc;
     jsonDoc.setObject(*root);
@@ -41,9 +59,9 @@ int GlobalSettings::StringToGlobalSettings(QString *str)
 
     QJsonObject root = document.object();
 
-    settings->logToFile = root["logToFile"].toBool();
-    settings->enableTimeshift = root["enableTimeshift"].toBool();
-    settings->logPath = root["logPath"].toString();
+    config->global_settings.logToFile = root["logToFile"].toBool();
+    config->global_settings.enableTimeshift = root["enableTimeshift"].toBool();
+    config->global_settings.logPath = root["logPath"].toString();
 
     return 0;
 }

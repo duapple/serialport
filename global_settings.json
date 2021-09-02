@@ -1,0 +1,27 @@
+{
+    "global_settings": {
+        "log_to_file": true,
+        "enable_timeshift": true,
+        "logPath": "/home/duapple/桌面/"
+    },
+    "user_config": [
+        {
+            "port_name": "ttyUSB0",
+            "dev_description": "com",
+            "open": true,
+            "bound_rate": 115200,
+            "date_bit": 8,
+            "parity_bit": 1,
+            "stop_bit": 1,
+            "flow_control": 1,
+            "enable_receive": true,
+            "echo": true,
+            "timeshift": false,
+            "end_char": 1,
+            "send_record": [
+                "network id"
+            ],
+            "valid": true
+        }
+    ]
+}

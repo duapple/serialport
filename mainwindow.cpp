@@ -12,13 +12,15 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , globalSettings(new class GlobalSettings)
     , ui(new Ui::MainWindow)
     , settings("SeriapPortAssistant", "SplitterWidget")
     , mythread(new Mythread)
 {
     ui->setupUi(this);
 
-    port = new QSerialPort(this);
+//    QSerialPort *port = new QSerialPort(this);
+//    ports << port;
 
     ui->radioButton_openPort->setStyleSheet("QRadioButton::indicator {width:15px;height:15px;border-radius:7px}"
                                    "QRadioButton::indicator:checked {background-color:green;}"
@@ -37,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->splitter_2->setCollapsible(index, false);
 
     initSerialPortSetting();
-    connections();
+    // connections();
     restoreUiSettings();
 
     // ui->textEdit_dataReceive->setFontWeight(7);
@@ -46,35 +48,77 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete port;
+
+    clear_list_ports();
+}
+
+void MainWindow::clear_list_ports()
+{
+    foreach (QSerialPort *p, ports)
+    {
+        if (p)
+        {
+            ports.removeOne(p);
+            delete p;
+            p = NULL;
+        }
+    }
+}
+
+QSerialPort* MainWindow::find_port_from_list(QString const &port_name)
+{
+    uint32_t i = 0;
+    foreach(const QSerialPortInfo info, infoList)
+    {
+        if (port_name == info.portName())
+        {
+            return ports[i];
+        }
+        i++;
+    }
+    return NULL;
 }
 
 void MainWindow::flush_device(void)
 {
     ui->comboBox_port->clear();
+    clear_list_ports();
 
     infoList = QSerialPortInfo::availablePorts();
     foreach(const QSerialPortInfo &info, infoList)
     {
         ui->comboBox_port->addItem(info.portName() + " (" + info.description() + ")");
+        QSerialPort *port = new QSerialPort(this);
+        ports << port;
     }
     if (ui->comboBox_port->count() == 0) {
         ui->comboBox_port->addItem(tr("NULL"));
         ui->radioButton_openPort->setEnabled(false);
     }
+
+    current_port = find_port_from_list(infoList[ui->comboBox_port->currentIndex()].portName());
+    connections();
 }
 
 void MainWindow::initSerialPortSetting(void)
 {
     infoList = QSerialPortInfo::availablePorts();
+
+    clear_list_ports();
+
     foreach(const QSerialPortInfo &info, infoList)
     {
         ui->comboBox_port->addItem(info.portName() + " (" + info.description() + ")");
+        QSerialPort *port = new QSerialPort(this);
+        ports << port;
     }
     if (ui->comboBox_port->count() == 0) {
         ui->comboBox_port->addItem(tr("NULL"));
         ui->radioButton_openPort->setEnabled(false);
     }
+
+    current_port = find_port_from_list(infoList[ui->comboBox_port->currentIndex()].portName());
+    connections();
 
     this->baudRate << QSerialPort::Baud115200 << QSerialPort::Baud57600 << QSerialPort::Baud38400
                    << QSerialPort::Baud19200 << QSerialPort::Baud9600 << QSerialPort::Baud4800
@@ -175,8 +219,8 @@ void MainWindow::restoreUiSettings()
     if (settings.contains("global_settings"))
     {
         QString str = settings.value("global_settings").toString();
-        globalSettings.StringToGlobalSettings(&str);
-        ui->action_6->setChecked(globalSettings.global_settings.logToFile);
+        globalSettings->StringToGlobalSettings(&str);
+        ui->action_6->setChecked(globalSettings->config->global_settings.logToFile);
     }
 
     if (settings.contains("send_data_records"))
@@ -208,41 +252,41 @@ void MainWindow::restoreUiSettings()
 void MainWindow::on_radioButton_openPort_toggled(bool checked)
 {
     if (checked) {
-        port->setPort(infoList[ui->comboBox_port->currentIndex()]);
-        port->setBaudRate(baudRate[ui->comboBox_baudRate->currentIndex()]);
-        port->setDataBits(dataBits[ui->comboBox_dateBit->currentIndex()]);
-        port->setParity(parity[ui->comboBox_parityBit->currentIndex()]);
-        port->setStopBits(stopBits[ui->comboBox_stopBit->currentIndex()]);
-        port->setFlowControl(flowControl[ui->comboBox_flowControl->currentIndex()]);
-        if (port->open(QSerialPort::ReadWrite))
+        current_port->setPort(infoList[ui->comboBox_port->currentIndex()]);
+        current_port->setBaudRate(baudRate[ui->comboBox_baudRate->currentIndex()]);
+        current_port->setDataBits(dataBits[ui->comboBox_dateBit->currentIndex()]);
+        current_port->setParity(parity[ui->comboBox_parityBit->currentIndex()]);
+        current_port->setStopBits(stopBits[ui->comboBox_stopBit->currentIndex()]);
+        current_port->setFlowControl(flowControl[ui->comboBox_flowControl->currentIndex()]);
+        if (current_port->open(QSerialPort::ReadWrite))
         {
             /* 保存接收日志到文件 */
-            if (globalSettings.global_settings.logToFile)
+            if (globalSettings->config->global_settings.logToFile)
             {
                 create_log_file();
             }
 
             ui->radioButton_openPort->setText(tr("关闭串口"));
             ui->pushButton_dataSend->setStyleSheet("background-color: rgb(85, 170, 255);");
-            statusBar()->showMessage("Open port success:  " + port->portName() + " ( " + infoList[ui->comboBox_port->currentIndex()].description() + " )");
-            statusBar()->setStyleSheet("color:green");
+            statusBar()->showMessage("Open port success:  " + current_port->portName() + " ( " + infoList[ui->comboBox_port->currentIndex()].description() + " )");
+            statusBar()->setStyleSheet("color:blue");
             qInfo() << "Open serial port: " << ui->comboBox_port->currentText() << "success";
         } else {
             checked = false;
             ui->radioButton_openPort->setChecked(checked);
-            QString message = "Connect to " + ui->comboBox_port->currentText() + " failed : " + port->errorString();
+            QString message = "Connect to " + ui->comboBox_port->currentText() + " failed : " + current_port->errorString();
             statusBar()->showMessage(message,5000);
             statusBar()->setStyleSheet("color:red");
             ui->pushButton_dataSend->setStyleSheet("background-color: rgb(215, 215, 215);");
             qInfo() << "Open serial port: " << ui->comboBox_port->currentText() << "failed";
         }
     } else {
-        port->close();
+        current_port->close();
         ui->radioButton_openPort->setText(tr("打开串口"));
         ui->pushButton_dataSend->setStyleSheet("background-color: rgb(215, 215, 215)");
-        statusBar()->showMessage("Port " + port->portName() + " ( " + infoList[ui->comboBox_port->currentIndex()].description() + " ) is closed");
+        statusBar()->showMessage("Port " + current_port->portName() + " ( " + infoList[ui->comboBox_port->currentIndex()].description() + " ) is closed");
         statusBar()->setStyleSheet("color:red");
-        qInfo() << "Close serial port: " << port->portName() << "success";
+        qInfo() << "Close serial port: " << current_port->portName() << "success";
     }
 
     ui->comboBox_port->setEnabled(!checked);
@@ -257,12 +301,17 @@ void MainWindow::on_radioButton_openPort_toggled(bool checked)
 
 void MainWindow::connections(void)
 {
-    connect(port, &QSerialPort::readyRead, this, &MainWindow::serialPortDataReceive);
+    if (current_port)
+    {
+        connect(current_port, &QSerialPort::readyRead, this, &MainWindow::serialPortDataReceive);
+    } else {
+        qDebug() << "当前无匹配的serialport";
+    }
 }
 
 void MainWindow::serialPortDataReceive(void)
 {
-    QByteArray data = port->readAll();
+    QByteArray data = current_port->readAll();
     QString text;
 
     if (is_close_receive)
@@ -271,10 +320,20 @@ void MainWindow::serialPortDataReceive(void)
         return ;
     }
 
-    if (ui->checkBox_timestamp->isChecked())
+    static bool current_str_end = false;
+    if (ui->checkBox_timestamp->isChecked() && current_str_end)
     {
+        current_str_end = false;
         QDateTime timestamp = QDateTime::currentDateTime();
         text = timestamp.toString("[yyyy-MM-dd hh:mm:ss]>> ");
+    }
+
+    /* 判断当前一次接收是否完成, 完成后，下一次接收会在前面加上时间戳 */
+    if (data.toStdString().length() > 0 && (data.toStdString().at(data.toStdString().length() - 1) == '\r' ||
+                                            data.toStdString().at(data.toStdString().length() - 1) == '\n' ||
+                                            data.toStdString().at(data.toStdString().length() - 1) == '\0'))
+    {
+        current_str_end = true;
     }
 
     text += data;
@@ -354,7 +413,13 @@ void MainWindow::sendData(void)
         if (ui->checkBox_timestamp->isChecked())
         {
             QDateTime timestamp = QDateTime::currentDateTime();
-            echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+            if (ui->comboBox_endChar->currentText() != "NULL")
+            {
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+            } else
+            {
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo + "\n";
+            }
         }
         ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
         ui->textEdit_dataReceive->insertPlainText(echo);
@@ -362,9 +427,9 @@ void MainWindow::sendData(void)
     }
 
     /* Send data to serial port. */
-    if (port->write(dataSend.toStdString().c_str()) == -1)
+    if (current_port->write(dataSend.toStdString().c_str()) == -1)
     {
-        statusBar()->showMessage("Send data failed: " + port->errorString(), 5000);
+        statusBar()->showMessage("Send data failed: " + current_port->errorString(), 5000);
         statusBar()->setStyleSheet("color:red");
         return ;
     }
@@ -410,7 +475,13 @@ void MainWindow::sendData(QString &s)
         if (ui->checkBox_timestamp->isChecked())
         {
             QDateTime timestamp = QDateTime::currentDateTime();
-            echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+            if (ui->comboBox_endChar->currentText() != "NULL")
+            {
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+            } else
+            {
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo + "\n";
+            }
         }
         ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
         ui->textEdit_dataReceive->insertPlainText(echo);
@@ -419,9 +490,9 @@ void MainWindow::sendData(QString &s)
 
 
     /* Send data to serial port. */
-    if (port->write(dataSend.toStdString().c_str()) == -1)
+    if (current_port->write(dataSend.toStdString().c_str()) == -1)
     {
-        statusBar()->showMessage("Send data failed: " + port->errorString(), 5000);
+        statusBar()->showMessage("Send data failed: " + current_port->errorString(), 5000);
         statusBar()->setStyleSheet("color:red");
         return ;
     }
@@ -449,6 +520,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                 if (ui->listWidget->currentRow() == 0 && is_sent == true)
                 {
                     ui->textEdit_dataSend->setText(ui->listWidget->currentItem()->text());
+                    ui->textEdit_dataSend->moveCursor(QTextCursor::End);
                     is_sent = false;
                     return true;
                 }
@@ -458,6 +530,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                     {
                         ui->listWidget->setCurrentRow(ui->listWidget->currentRow() + 1);
                         ui->textEdit_dataSend->setText(ui->listWidget->currentItem()->text());
+                        ui->textEdit_dataSend->moveCursor(QTextCursor::End);
                         return true;
                     }
                 }
@@ -468,6 +541,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                 {
                     ui->listWidget->setCurrentRow(ui->listWidget->currentRow() - 1);
                     ui->textEdit_dataSend->setText(ui->listWidget->currentItem()->text());
+                    ui->textEdit_dataSend->moveCursor(QTextCursor::End);
                     return true;
                 }
                 else {
@@ -507,7 +581,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("timestamp", ui->checkBox_timestamp->isChecked());
     settings.setValue("endChar", ui->comboBox_endChar->currentText());
     settings.setValue("data_send_list_window", ui->dockWidget->isHidden());
-    settings.setValue("global_settings", globalSettings.globalSettingsToString());
+    settings.setValue("global_settings", globalSettings->globalSettingsToString());
 
     QStringList send_data_records;
     for (int i = 0; i < ui->listWidget->count(); i++)
@@ -667,7 +741,7 @@ void MainWindow::on_action_2_triggered()
 
 void MainWindow::on_action_4_triggered()
 {
-    settings_window = new Settings(nullptr, &globalSettings);
+    settings_window = new Settings(nullptr, globalSettings);
 
     connect(settings_window, SIGNAL(enable_log_to_file(bool)), this, SLOT(enable_log_to_file1(bool)));
 
@@ -706,7 +780,7 @@ void MainWindow::on_action_3_triggered(bool checked)
 
 void MainWindow::save_receive_data(QString &s)
 {
-    if (globalSettings.global_settings.logToFile == false) return ;
+    if (globalSettings->config->global_settings.logToFile == false) return ;
     static QMutex mutex;
     mutex.lock();
     // 输出信息至文件中（读写、追加形式）
@@ -733,18 +807,24 @@ void MainWindow::create_log_file()
     }
 
     QString time = "";
-    if (globalSettings.global_settings.enableTimeshift)
+    if (globalSettings->config->global_settings.enableTimeshift)
     {
         time = "-" + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
     }
 #if defined(Q_OS_LINUX)
-    receiveDataFileName = globalSettings.global_settings.logPath + "/" + ui->comboBox_port->currentText() + time + ".log";
+    receiveDataFileName = globalSettings->config->global_settings.logPath + "/" + ui->comboBox_port->currentText() + time + ".log";
 #elif defined(Q_OS_WIN)
-    receiveDataFileName = globalSettings.global_settings.logPath + "\\" + ui->comboBox_port->currentText() + time + ".log";
+    receiveDataFileName = globalSettings->config->global_settings.logPath + "\\" + ui->comboBox_port->currentText() + time + ".log";
 #endif
+    static QMutex mutex;
+    mutex.lock();
     QFile file(receiveDataFileName);
     file.open(QIODevice::ReadWrite | QIODevice::Append);
+    QTextStream stream(&file);
+    stream << ui->textEdit_dataReceive->toPlainText();
+    file.flush();
     file.close();
+    mutex.unlock();
 }
 
 void MainWindow::enable_log_to_file1(bool checked)
@@ -754,7 +834,7 @@ void MainWindow::enable_log_to_file1(bool checked)
 
 void MainWindow::on_action_6_triggered(bool checked)
 {
-    globalSettings.global_settings.logToFile = checked;
+    globalSettings->config->global_settings.logToFile = checked;
 }
 
 Mythread::Mythread(QObject * parent)
