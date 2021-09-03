@@ -325,7 +325,7 @@ void MainWindow::serialPortDataReceive(void)
     {
         current_str_end = false;
         QDateTime timestamp = QDateTime::currentDateTime();
-        text = timestamp.toString("[yyyy-MM-dd hh:mm:ss]>> ");
+        text = timestamp.toString("[yyyy-MM-dd hh:mm:ss]-> ");
     }
 
     /* 判断当前一次接收是否完成, 完成后，下一次接收会在前面加上时间戳 */
@@ -415,10 +415,10 @@ void MainWindow::sendData(void)
             QDateTime timestamp = QDateTime::currentDateTime();
             if (ui->comboBox_endChar->currentText() != "NULL")
             {
-                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<- ") + echo;
             } else
             {
-                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo + "\n";
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<- ") + echo + "\n";
             }
         }
         ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
@@ -477,10 +477,10 @@ void MainWindow::sendData(QString &s)
             QDateTime timestamp = QDateTime::currentDateTime();
             if (ui->comboBox_endChar->currentText() != "NULL")
             {
-                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo;
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<- ") + echo;
             } else
             {
-                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<< ") + echo + "\n";
+                echo = timestamp.toString("[yyyy-MM-dd hh:mm:ss]<- ") + echo + "\n";
             }
         }
         ui->textEdit_dataReceive->moveCursor(QTextCursor::End);
